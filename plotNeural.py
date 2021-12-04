@@ -87,6 +87,7 @@ trial = 'trial1'
 dt = time[1]-time[0]
 fig, ax1 = plt.subplots()
 ax2 = ax1.twinx()
+ax3 = fig.add_axes([.67, .55, .16, .3])
 firingRate = FiringRate.CalculFiringRate(dictNeurons)
 for target in targets:
     start, stop = findMaxInter(target, dt)
@@ -96,17 +97,21 @@ for target in targets:
     # plot velocity
     newvel = np.zeros(stop+start)
     newfiringrate = np.zeros(stop+start)
+    #meanfiringrate = np.zeros()
     for trial in trials:
         vel, velx, vely = Velocity(dictNeurons, target, trial, dt)
         velfilt = filter(vel)
         peak = findPeak(velfilt)
         newvel = np.add(newvel, velfilt[peak-start:peak+stop])
         newfiringrate = np.add(newfiringrate, firingRate[target][trial][peak-start:peak+stop])
+        #meanfiringrate = np.add(meanfiringrate, firingRate[target][trial])
         #ax1.plot(time[0:-2], velfilt, label = 'velocity', color = 'r')
     newvel = newvel/6
     newfiringrate = newfiringrate/6
-    ax1.plot(np.arange(-start, stop), newvel, label = target)
-    ax2.plot(np.arange(-start, stop), newfiringrate, label = target)
+    #meanfiringrate = meanfiringrate/6
+    #ax1.plot(np.arange(-start, stop), newvel, label = target)
+    ax1.plot(np.arange(-start, stop), newfiringrate, label = target)
+    #ax1.plot(np.arange(0, len(meanfiringrate)), meanfiringrate, label=target)
         #ax1.vlines(time[findPeak(velfilt)], 0, max(velfilt))
 
     #plot firing rate
@@ -114,10 +119,10 @@ for target in targets:
     
     # plot arm movement
     #ax1.plot(dictNeurons[target][trial]['handypos'], dictNeurons[target][trial]['handxpos'])
-    #ax1.plot(dictNeurons[target][trial]['handypos'][start:stop], dictNeurons[target][trial]['handxpos'][start:stop])
+    ax3.plot(dictNeurons[target][trial]['handypos'][peak-start:peak+stop], dictNeurons[target][trial]['handxpos'][peak-start:peak+stop])
 
 
-ax1.legend()
+ax1.legend(loc='upper right')
 ax1.set_ylabel('Velocity [m/s]')
 ax2.set_ylabel('Firing rate [1/s]')
 plt.show()

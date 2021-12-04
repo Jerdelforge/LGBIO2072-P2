@@ -2,7 +2,8 @@ import loadDataP2 as data
 import numpy as np
 import matplotlib.pyplot as plt
 import FiringRate
-
+from scipy.signal import butter, filtfilt
+from scipy.fft import fft
 
 
 dictMuscles = data.loadMuscle()
@@ -11,6 +12,8 @@ dictNeurons = data.loadNeuron() #['time', 'shoang', 'elbang', 'handxpos', 'handy
 targets = ['target1','target2','target3','target4','target5','target6','target7','target8']
 trials = ['trial1','trial2','trial3','trial4','trial5','trial6']
 time = dictNeurons['target1']['trial6']['time']
+
+
 # for target in targets:
 #     plt.plot(dictNeurons[target]['trial6']['handypos'], dictNeurons[target]['trial6']['handxpos'])
 # plt.show()
@@ -42,16 +45,52 @@ def Velocity(dictNeurons, target, trial, dt):
         vely[i] = derive(dictNeurons[target][trial]['handypos'], i)/dt
         vel[i] = np.sqrt((velx[i])**2 + (vely[i])**2)
     return vel, velx, vely
-target = 'target1'
+
+def extractMvt(vel, peak):
+    start = peak
+    delay = 10
+    while vel[start] > vel[start-delay]:
+        start = start - 1
+    stop = peak
+    while vel[stop] > vel[stop+delay]:
+        stop = stop + 1
+    return start, stop
+
+def findPeak(vel):
+    peak = np.where(vel == max(vel))
+    return peak[0][0]
+
+def filter(signal):
+    b, a = butter(2, 5/(0.5*200), 'low')
+    filtered = filtfilt(b, a, signal)
+    return filtered
+
+
+target = 'target2'
+trial = 'trial1'
 dt = time[1]-time[0]
 fig, ax1 = plt.subplots()
 ax2 = ax1.twinx()
+firingRate = FiringRate.CalculFiringRate(dictNeurons)
 for trial in trials:
+    time = np.transpose(dictNeurons[target][trial]['time'])[0]
     vel, velx, vely = Velocity(dictNeurons, target, trial, dt)
-    ax1.plot(np.transpose(dictNeurons[target][trial]['time'])[0][0:-2], vel, label = 'velocity')
-    firingRate = FiringRate.CalculFiringRate(dictNeurons)
-    ax2.plot(dictNeurons[target][trial]['time'], firingRate[target][trial], label = 'firing rate')
-fig.legend()
+    velfilt = filter(vel)
+    start, stop = extractMvt(velfilt, findPeak(velfilt))
+
+    # plot velocity
+    ax1.plot(time[0:-2], velfilt, label = 'velocity', color = 'r')
+    ax1.plot(time[start:stop], velfilt[start:stop], label = 'velocity filtered')
+    #ax1.vlines(time[findPeak(velfilt)], 0, max(velfilt))
+
+    #plot firing rate
+    #ax2.plot(dictNeurons[target][trial]['time'], firingRate[target][trial], label = 'firing rate')
+    
+    # plot arm movement
+    #ax1.plot(dictNeurons[target][trial]['handypos'], dictNeurons[target][trial]['handxpos'])
+    #ax1.plot(dictNeurons[target][trial]['handypos'][start:stop], dictNeurons[target][trial]['handxpos'][start:stop])
+ax1.legend()
 ax1.set_ylabel('Velocity [m/s]')
 ax2.set_ylabel('Firing rate [1/s]')
 plt.show()
+

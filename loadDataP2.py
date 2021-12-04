@@ -30,8 +30,8 @@ def loadMuscle():
     HandYVel = spio.loadmat("dataMuscle/HandYVel.mat")
     HandYForce = spio.loadmat("dataMuscle/HandYForce.mat")
     
-    Pectoralis = spio.loadmat("dataMuscle/Pectoralis.mat")
-    Deltoid = spio.loadmat("dataMuscle/Deltoid.mat")
+    Pectoralis = spio.loadmat("dataMuscle/Pectoralis.mat")#EMG
+    Deltoid = spio.loadmat("dataMuscle/Deltoid.mat")#EMG
     
     extracted = spio.loadmat("dataMuscle/extracted.mat")
     descriptions = spio.loadmat("dataMuscle/descriptions.mat")

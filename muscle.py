@@ -47,7 +47,13 @@ plt.plot(pectomean2,label="pas un connard qui me frappe le bras")
 #plt.plot(pectomean3,label="Un connard me frappe le bras -X")
 plt.legend()
 plt.ylabel("Activité musculaire en Volt[mV]")
+#vitesse=dict["HandXVel"]
 plt.plot(mean(vitesse[50:55]))
+plt.show()
+plt.plot(mean(forceX[50:55]))
+plt.plot(mean(forceY[50:55]))
+plt.show()
+plt.plot(mean(pos[50:55]))
 
 print(dict["descriptions"])
 
